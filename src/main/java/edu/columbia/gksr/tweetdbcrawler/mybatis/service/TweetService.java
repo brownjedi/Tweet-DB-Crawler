@@ -4,6 +4,7 @@ import edu.columbia.gksr.tweetdbcrawler.domain.Tweet;
 import edu.columbia.gksr.tweetdbcrawler.mybatis.mapper.TweetMapper;
 import edu.columbia.gksr.tweetdbcrawler.mybatis.util.MyBatisConnectionFactory;
 import org.apache.ibatis.session.SqlSession;
+import org.apache.ibatis.session.TransactionIsolationLevel;
 
 import java.util.List;
 
@@ -13,9 +14,9 @@ import java.util.List;
 
 public class TweetService {
 
-    public Tweet getTweetById(int id) {
+    public Tweet getTweetById(long id) {
 
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession(TransactionIsolationLevel.READ_UNCOMMITTED);
         Tweet tweet;
         try {
             TweetMapper tweetMapper = sqlSession.getMapper(TweetMapper.class);
@@ -28,7 +29,7 @@ public class TweetService {
     }
 
     public List<Tweet> getAllTweets() {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession(TransactionIsolationLevel.READ_UNCOMMITTED);
         List<Tweet> tweetList;
         try {
             TweetMapper tweetMapper = sqlSession.getMapper(TweetMapper.class);
@@ -41,7 +42,7 @@ public class TweetService {
     }
 
     public List<Tweet> getTweetsLimit(int limit) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession(TransactionIsolationLevel.READ_UNCOMMITTED);
         List<Tweet> tweetList;
         try {
             TweetMapper tweetMapper = sqlSession.getMapper(TweetMapper.class);
@@ -54,7 +55,7 @@ public class TweetService {
     }
 
     public List<Tweet> getTweetsByHashTag(String hashTag) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession(TransactionIsolationLevel.READ_UNCOMMITTED);
         List<Tweet> tweetList;
         try {
             TweetMapper tweetMapper = sqlSession.getMapper(TweetMapper.class);
@@ -67,7 +68,7 @@ public class TweetService {
     }
 
     public List<String> getAllHashTags() {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession(TransactionIsolationLevel.READ_UNCOMMITTED);
         List<String> hashTagList;
         try {
             TweetMapper tweetMapper = sqlSession.getMapper(TweetMapper.class);
@@ -80,7 +81,7 @@ public class TweetService {
     }
 
     public List<String> getHashTagsLimit(int limit) {
-        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession(TransactionIsolationLevel.READ_UNCOMMITTED);
         List<String> hashTagList;
         try {
             TweetMapper tweetMapper = sqlSession.getMapper(TweetMapper.class);
@@ -97,6 +98,10 @@ public class TweetService {
         try {
             TweetMapper tweetMapper = sqlSession.getMapper(TweetMapper.class);
             tweetMapper.updateTweet(tweet);
+            tweetMapper.deleteHashTags(tweet.getId());
+            if (tweet.getHashTags() != null && tweet.getHashTags().size() > 0) {
+                tweetMapper.insertHashTags(tweet.getHashTags(), tweet.getId());
+            }
             sqlSession.commit();
         } finally {
             sqlSession.close();
@@ -108,6 +113,9 @@ public class TweetService {
         try {
             TweetMapper tweetMapper = sqlSession.getMapper(TweetMapper.class);
             tweetMapper.insertTweet(tweet);
+            if (tweet.getHashTags() != null && tweet.getHashTags().size() > 0) {
+                tweetMapper.insertHashTags(tweet.getHashTags(), tweet.getId());
+            }
             sqlSession.commit();
         } finally {
             sqlSession.close();
@@ -118,7 +126,59 @@ public class TweetService {
         SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
         try {
             TweetMapper tweetMapper = sqlSession.getMapper(TweetMapper.class);
+            tweetMapper.deleteHashTags(tweet.getId());
             tweetMapper.deleteTweet(tweet);
+            sqlSession.commit();
+        } finally {
+            sqlSession.close();
+        }
+    }
+
+    public int getTweetCount() {
+        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession(TransactionIsolationLevel.READ_UNCOMMITTED);
+        int count = 0;
+        try {
+            TweetMapper tweetMapper = sqlSession.getMapper(TweetMapper.class);
+            count = tweetMapper.getTweetCount();
+            sqlSession.commit();
+        } finally {
+            sqlSession.close();
+        }
+        return count;
+    }
+
+    public long getOldestTweetId() {
+        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession(TransactionIsolationLevel.READ_UNCOMMITTED);
+        long tweetId;
+        try {
+            TweetMapper tweetMapper = sqlSession.getMapper(TweetMapper.class);
+            tweetId = tweetMapper.getOldestTweetId();
+            sqlSession.commit();
+        } finally {
+            sqlSession.close();
+        }
+        return tweetId;
+    }
+
+    public boolean tweetExists(long id) {
+        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        boolean tweetPresent;
+        try {
+            TweetMapper tweetMapper = sqlSession.getMapper(TweetMapper.class);
+            tweetPresent = tweetMapper.tweetExists(id);
+            sqlSession.commit();
+        } finally {
+            sqlSession.close();
+        }
+        return tweetPresent;
+    }
+
+    public void deleteTweetById(long tweetId) {
+        SqlSession sqlSession = MyBatisConnectionFactory.getSqlSessionFactory().openSession();
+        try {
+            TweetMapper tweetMapper = sqlSession.getMapper(TweetMapper.class);
+            tweetMapper.deleteHashTags(tweetId);
+            tweetMapper.deleteTweetById(tweetId);
             sqlSession.commit();
         } finally {
             sqlSession.close();

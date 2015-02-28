@@ -20,9 +20,10 @@
         <result property="createdDate" column="createdDate"/>
         <result property="updatedDate" column="updatedDate"/>
         <collection property="hashTags" resultMap='HashTagResult'/>
+
     </resultMap>
 
-    <select id="getTweetById" parameterType="int" resultMap="TweetResult">
+    <select id="getTweetById" parameterType="long" resultMap="TweetResult">
         select t1.id, t1.userScreenName, t1.userLocation, t1.statusText, t1.latitude, t1.longitude, t1.createdDate, t1.updatedDate, t2.hashTag
         from
         (
@@ -96,7 +97,7 @@
 
         UPDATE Tweets
         SET
-        userScreenNmae = #{userScreenName},
+        userScreenName = #{userScreenName},
         userLocation = #{userLocation},
         statusText = #{statusText},
         latitude = #{latitude},
@@ -105,21 +106,23 @@
         updatedDate = #{updatedDate}
         WHERE id = #{id};
 
-        delete from HashTags where tweetId = #{id};
-
-        INSERT INTO HashTags (tweetId, hashTag)
-        VALUES
-        <foreach item="element" index="index" collection="hashTags" open="(" separator="),(" close=")">
-            #{id}, #{element}
-        </foreach>
-
-
     </update>
 
     <delete id="deleteTweet" parameterType="Tweet">
 
-        delete from HashTags where tweetId = #{id};
         delete from Tweets where id = #{id};
+
+    </delete>
+
+    <delete id="deleteTweetById" parameterType="long">
+
+        delete from Tweets where id = #{id};
+
+    </delete>
+
+    <delete id="deleteHashTags" parameterType="long">
+
+        delete from HashTags where tweetId = #{tweetId};
 
     </delete>
 
@@ -127,14 +130,44 @@
     <insert id="insertTweet" parameterType="Tweet" keyProperty="id">
 
         INSERT INTO Tweets (id, userScreenName, userLocation, statusText, latitude, longitude, createdDate, updatedDate)
-        VALUES (#{id}, #{userScreenName}, #{userLocation}, #{statusText}, #{latitude}, #{longitude}, #{createdDate}, #{updatedDate});
-
-        INSERT INTO HashTags (tweetId, hashTag)
-        VALUES
-        <foreach item="element" index="index" collection="hashTags" separator=",">
-            (#{id}, #{element})
-        </foreach>
+        VALUES (#{id}, #{userScreenName}, #{userLocation}, #{statusText}, #{latitude}, #{longitude}, #{createdDate}, #{updatedDate})
 
     </insert>
+
+
+    <insert id="insertHashTags" parameterType="map">
+
+        <if test="hashTags != null and hashTags.size() > 0">
+
+            INSERT INTO HashTags (tweetId, hashTag)
+            VALUES
+            <foreach item="element" index="index" collection="hashTags" separator=",">
+                (#{tweetId}, #{element})
+            </foreach>
+
+        </if>
+
+    </insert>
+
+    <select id="getTweetCount" resultType="int">
+
+        SELECT COUNT(*) as count from Tweets;
+
+    </select>
+
+    <select id="getOldestTweetId" resultType="long">
+
+        select id FROM Tweets
+        ORDER BY updatedDate ASC
+        LIMIT 1
+
+    </select>
+
+    <select id="tweetExists" resultType="boolean">
+
+        select case when count(*) > 0 then 1 else 0 end as count
+        from Tweets where id = #{id};
+
+    </select>
 
 </mapper>

@@ -10,7 +10,7 @@ import java.util.List;
 
 public class Tweet {
 
-    private int id;
+    private long id;
     private String userScreenName;
     private String userLocation;
     private String statusText;
@@ -20,11 +20,11 @@ public class Tweet {
     private Date createdDate;
     private Date updatedDate;
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

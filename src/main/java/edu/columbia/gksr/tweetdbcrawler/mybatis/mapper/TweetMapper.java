@@ -2,6 +2,7 @@ package edu.columbia.gksr.tweetdbcrawler.mybatis.mapper;
 
 
 import edu.columbia.gksr.tweetdbcrawler.domain.Tweet;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -10,6 +11,8 @@ import java.util.List;
  */
 
 public interface TweetMapper {
+
+    public int getTweetCount();
 
     public Tweet getTweetById(long id);
 
@@ -27,10 +30,16 @@ public interface TweetMapper {
 
     public void insertTweet(Tweet tweet);
 
-//    public void insertHashTags(List<String> hashTags, int tweetId);
+    public void insertHashTags(@Param("hashTags") List<String> hashTags, @Param("tweetId") long tweetId);
 
     public void deleteTweet(Tweet tweet);
 
-//    public void deleteHashTags(int tweetId);
+    public void deleteTweetById(long tweetId);
+
+    public void deleteHashTags(long tweetId);
+
+    public long getOldestTweetId();
+
+    public boolean tweetExists(long id);
 
 }
