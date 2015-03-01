@@ -66,6 +66,7 @@ public class App {
                     tweet.setId(status.getId());
                     tweet.setUserScreenName(StringUtils.convertToUTF8(status.getUser().getScreenName()));
                     tweet.setUserLocation(StringUtils.convertToUTF8(status.getUser().getLocation()));
+                    tweet.setProfileImageURL(status.getUser().getBiggerProfileImageURL());
                     tweet.setStatusText(StringUtils.convertToUTF8(status.getText()));
                     tweet.setLatitude(status.getGeoLocation().getLatitude());
                     tweet.setLongitude(status.getGeoLocation().getLongitude());

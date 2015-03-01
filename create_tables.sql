@@ -2,10 +2,11 @@ CREATE TABLE Tweets (
 	id bigint primary key,
     userScreenName varchar(512) null,
     userLocation varchar(1024) null,
+    profileImageURL varchar(2048) null,
     statusText mediumtext null,
     latitude double null,
     longitude double null,
-	createdDate datetime,
+	  createdDate datetime,
     updatedDate datetime 
 );
 
