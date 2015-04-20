@@ -24,7 +24,7 @@ import java.util.logging.Logger;
 public class App {
 
     public static final Logger LOGGER = Logger.getLogger(App.class.getCanonicalName());
-    public static final int MAX_TWEETS = 1000000;
+    public static final int MAX_TWEETS = 20000;
 
     public static void main(String[] args) {
 

@@ -12,6 +12,7 @@ import java.util.List;
  * Created by saikarthikreddyginni on 2/27/15.
  */
 
+@SuppressWarnings("unused")
 public class TweetService {
 
     public Tweet getTweetById(long id) {
